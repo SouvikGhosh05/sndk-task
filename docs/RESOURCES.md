@@ -15,6 +15,59 @@ Complete inventory of all AWS resources created for the SNDK Task infrastructure
 
 ---
 
+## 🚀 Application Access
+
+### Live Application Endpoint
+
+**Public URL**: http://sndk-prod-alb-1451949546.ap-south-1.elb.amazonaws.com
+
+### Available Endpoints
+
+| Endpoint | Method | Description | Response |
+|----------|--------|-------------|----------|
+| `/` | GET | Main application endpoint | "Hello World from ECS Fargate!" + hostname |
+| `/health` | GET | Health check endpoint | Status: healthy, uptime, timestamp |
+| `/info` | GET | System information | Node.js version, platform, CPU, memory |
+
+### Quick Access Commands
+
+```bash
+# Main endpoint
+curl http://sndk-prod-alb-1451949546.ap-south-1.elb.amazonaws.com/
+
+# Health check
+curl http://sndk-prod-alb-1451949546.ap-south-1.elb.amazonaws.com/health
+
+# System information
+curl http://sndk-prod-alb-1451949546.ap-south-1.elb.amazonaws.com/info
+```
+
+### Current Deployment Status
+
+- **ECS Tasks Running**: 2/2 (Both healthy)
+- **Target Group Health**: 2/2 targets healthy
+- **Availability Zones**: ap-south-1a, ap-south-1b
+- **Container Image**: `654654234818.dkr.ecr.ap-south-1.amazonaws.com/sndk-prod-api:latest`
+- **Task Private IPs**:
+  - Task 1: 10.0.11.174 (private-subnet-1)
+  - Task 2: 10.0.12.15 (private-subnet-2)
+
+### Access Flow
+
+```
+Internet (HTTP Port 80)
+    ↓
+Application Load Balancer (sndk-prod-alb)
+    ↓
+Target Group (sndk-prod-tg)
+    ↓
+ECS Tasks (2 tasks across 2 AZs)
+```
+
+**Note**: The application is accessible via HTTP on port 80. For production, configure HTTPS with ACM certificate.
+
+---
+
 ## Networking Resources (21 Resources)
 
 ### VPC (1)
@@ -472,7 +525,6 @@ terraform destroy -auto-approve
 - **Terraform State**: Stored locally in `terraform.tfstate`
 - **Terraform Lock**: Stored in `.terraform.lock.hcl`
 - **AWS Console**: https://console.aws.amazon.com/
-- **CloudWatch Logs**: https://console.aws.amazon.com/cloudwatch/home?region=ap-south-1#logsV2:log-groups/log-group/$252Fecs$252Fsndk-prod
 
 ---
 
