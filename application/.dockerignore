@@ -1,0 +1,95 @@
+# =============================================================================
+# .dockerignore - Exclude files from Docker build context
+# Purpose: Reduce build context size and prevent sensitive files from being
+# copied into the Docker image
+# =============================================================================
+
+# Node.js dependencies (will be installed in Dockerfile)
+node_modules
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Package manager lock files (except package-lock.json which we need)
+yarn.lock
+pnpm-lock.yaml
+
+# Environment files (may contain secrets)
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+*.env
+
+# Git files
+.git
+.gitignore
+.gitattributes
+.github
+
+# IDE and editor files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Test files
+test
+tests
+*.test.js
+*.spec.js
+__tests__
+coverage
+.nyc_output
+
+# Documentation
+README.md
+CHANGELOG.md
+LICENSE
+*.md
+docs
+
+# Docker files (no need to copy into image)
+Dockerfile
+Dockerfile.*
+.dockerignore
+docker-compose*.yml
+
+# CI/CD files
+.travis.yml
+.gitlab-ci.yml
+.circleci
+Jenkinsfile
+azure-pipelines.yml
+.github
+
+# Log files
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Build outputs (if any)
+dist
+build
+.cache
+
+# Temporary files
+tmp
+temp
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
