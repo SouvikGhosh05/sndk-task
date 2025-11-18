@@ -69,6 +69,153 @@ docker rm hello-api
 
 ---
 
+## 🐳 Docker Build & Push to ECR
+
+### Build Docker Image
+
+```bash
+# Navigate to application directory
+cd /home/ubuntu/sndk-task/application
+
+# Build the image
+docker build -t hello-api:latest -f Dockerfile .
+
+# Verify the build
+docker images | grep hello-api
+```
+
+**Expected Output:**
+```
+hello-api    latest    abc123def456   2 minutes ago   197MB
+```
+
+### Test Image Locally
+
+```bash
+# Run container
+docker run -d -p 3000:3000 --name hello-api-test hello-api:latest
+
+# Test endpoints
+curl http://localhost:3000/
+curl http://localhost:3000/health
+curl http://localhost:3000/info
+
+# Check logs
+docker logs hello-api-test
+
+# Stop and remove
+docker stop hello-api-test
+docker rm hello-api-test
+```
+
+### Push to AWS ECR
+
+#### 1. Authenticate with ECR
+
+```bash
+# Get AWS account ID and set region
+export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+export AWS_REGION=ap-south-1
+
+# Login to ECR
+aws ecr get-login-password --region $AWS_REGION | \
+  docker login --username AWS --password-stdin \
+  $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+```
+
+#### 2. Tag Image for ECR
+
+```bash
+# Tag image with ECR repository URL
+docker tag hello-api:latest \
+  $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/sndk-prod-api:latest
+
+# Example with actual account ID (654654234818):
+docker tag hello-api:latest \
+  654654234818.dkr.ecr.ap-south-1.amazonaws.com/sndk-prod-api:latest
+```
+
+#### 3. Push to ECR
+
+```bash
+# Push image
+docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/sndk-prod-api:latest
+```
+
+**Expected Output:**
+```
+The push refers to repository [654654234818.dkr.ecr.ap-south-1.amazonaws.com/sndk-prod-api]
+latest: digest: sha256:9248187dee30f48490acd9a1cf96d9aa... size: 1234
+```
+
+#### 4. Verify in ECR
+
+```bash
+# List images in ECR repository
+aws ecr describe-images \
+  --repository-name sndk-prod-api \
+  --region $AWS_REGION \
+  --query 'imageDetails[0].[imageTags[0],imageSizeInBytes,imagePushedAt]' \
+  --output table
+```
+
+### Complete Workflow Script
+
+```bash
+#!/bin/bash
+# Complete build, test, and push workflow
+
+export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+export AWS_REGION=ap-south-1
+export ECR_REPO=sndk-prod-api
+
+# Build
+cd /home/ubuntu/sndk-task/application
+docker build -t hello-api:latest -f Dockerfile .
+
+# Test locally
+docker run -d -p 3000:3000 --name test-container hello-api:latest
+sleep 3
+curl -s http://localhost:3000/health
+docker stop test-container && docker rm test-container
+
+# Authenticate with ECR
+aws ecr get-login-password --region $AWS_REGION | \
+  docker login --username AWS --password-stdin \
+  $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+
+# Tag and push
+docker tag hello-api:latest \
+  $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:latest
+
+docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:latest
+
+# Verify
+aws ecr describe-images --repository-name $ECR_REPO --region $AWS_REGION
+```
+
+### Versioned Builds
+
+```bash
+# Build with specific version
+export VERSION=v1.0.0
+
+docker build -t hello-api:$VERSION -f Dockerfile .
+
+# Tag for ECR (both versioned and latest)
+docker tag hello-api:$VERSION \
+  $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/sndk-prod-api:$VERSION
+
+docker tag hello-api:$VERSION \
+  $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/sndk-prod-api:latest
+
+# Push both tags
+docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/sndk-prod-api:$VERSION
+docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/sndk-prod-api:latest
+```
+
+---
+
 ## 🔍 Application Endpoints
 
 | Endpoint | Method | Description |
@@ -239,35 +386,6 @@ nodemon app.js
 - ✅ Runs as non-root user
 - ✅ Graceful shutdown works
 - ✅ No vulnerabilities in base image
-
----
-
-## 🔧 Troubleshooting
-
-### Container exits immediately
-```bash
-# Check logs
-docker logs hello-api
-
-# Common cause: Port already in use
-lsof -i :3000
-```
-
-### Permission denied errors
-```bash
-# Ensure running as non-root
-docker exec hello-api id
-# Should show uid=1001(nodejs)
-```
-
-### Image build fails
-```bash
-# Clear Docker cache
-docker builder prune
-
-# Rebuild from scratch
-docker build --no-cache -t hello-api:latest .
-```
 
 ---
 
