@@ -35,6 +35,8 @@ module "iam" {
 }
 
 # ALB Module
+# Creates: ALB, Target Group V1, Listener
+# Also contains commented V2 target group and listener rule (see modules/alb/main.tf)
 module "alb" {
   source = "../../modules/alb"
 

@@ -36,3 +36,22 @@ output "listener_arn" {
   description = "HTTP listener ARN"
   value       = aws_lb_listener.http.arn
 }
+
+# =============================================================================
+# OPTIONAL: Outputs for V2 Resources (uncomment when using V2)
+# =============================================================================
+
+# output "target_group_v2_arn" {
+#   description = "Target group V2 ARN"
+#   value       = aws_lb_target_group.v2.arn
+# }
+#
+# output "target_group_v2_name" {
+#   description = "Target group V2 name"
+#   value       = aws_lb_target_group.v2.name
+# }
+#
+# output "listener_rule_v2_arn" {
+#   description = "Listener rule V2 ARN"
+#   value       = aws_lb_listener_rule.v2.arn
+# }

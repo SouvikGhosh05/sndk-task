@@ -78,3 +78,13 @@ variable "health_check_grace_period_seconds" {
   type        = number
   default     = 60
 }
+
+# =============================================================================
+# OPTIONAL: Variable for V2 Service (uncomment when using V2)
+# =============================================================================
+
+# variable "target_group_v2_arn" {
+#   description = "ARN of the target group for V2 service"
+#   type        = string
+#   default     = ""
+# }
