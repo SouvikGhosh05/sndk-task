@@ -63,6 +63,7 @@ module "ecs" {
   task_execution_role_arn   = module.iam.task_execution_role_arn
   task_role_arn             = module.iam.task_role_arn
   target_group_arn          = module.alb.target_group_arn
+  target_group_v2_arn       = module.alb.target_group_v2_arn
   desired_count             = var.desired_count
   task_cpu                  = var.task_cpu
   task_memory               = var.task_memory
